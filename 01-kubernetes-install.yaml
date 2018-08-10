@@ -1,0 +1,39 @@
+---
+- hosts: [kubernetes-cluster]
+  remote_user: vagrant
+  tasks:
+    - name: Docker Prerequisites
+      apt: name={{item}} update_cache=yes
+      become: yes
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+    - name: Docker GPG key
+      become: yes
+      apt_key: url=https://download.docker.com/linux/debian/gpg
+    - name: Docker APT repository
+      become: yes
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/debian {{ansible_distribution_release}} stable
+        state: present
+    - name: Docker
+      become: yes
+      apt:
+        name: docker-ce=17.03.2~ce-0~debian-stretch
+    - name: Kubernetes GPG key
+      become: yes
+      apt_key: url=https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    - name: Kubernetes APT repository
+      become: yes
+      apt_repository:
+        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+    - name: kubelet, kubeadm and kubectl
+      become: yes
+      apt: name={{item}} update_cache=yes
+      with_items:
+        - kubelet
+        - kubeadm
+        - kubectl

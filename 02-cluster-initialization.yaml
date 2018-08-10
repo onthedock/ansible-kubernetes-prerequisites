@@ -1,0 +1,29 @@
+- hosts: master
+  remote_user: vagrant
+  tasks:
+   - name: Initialize the cluster
+     become: yes
+     shell: kubeadm init --apiserver-advertise-address $(hostname -i) >> cluster-init.txt
+     args:
+        chdir: /home/vagrant/
+        creates: cluster-init.txt
+   - name: Create .kube directory
+     become: yes
+     become_user: vagrant
+     file:
+        path: /home/vagrant/.kube
+        state: directory
+        mode: 0755
+   - name: Copy admin.conf to user's kube config
+     copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/vagrant/.kube/config
+        remote_src: yes
+        owner: vagrant
+   - name: Install Pod network (Weave.net)
+     become: yes
+     become_user: vagrant
+     shell: kubectl apply -n kube-system -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')" >> pod_network_setup.txt
+     args:
+        chdir: /home/vagrant
+        creates: pod_network_setup.txt

@@ -1,0 +1,7 @@
+---
+- hosts: [master]
+  remote_user: vagrant
+  tasks:
+    - name: Cluster - Teardown (MASTER)
+      become: yes
+      shell: kubeadm reset
